@@ -145,12 +145,11 @@ function drawFeaturePoints(canvas, img, face) {
   // Obtain a 2D context object to draw on the canvas
   var ctx = canvas.getContext('2d');
   ctx.strokeStyle="#FFF";
-
   // Loop over each feature point in the face
   for (var id in face.featurePoints) {
     var featurePoint = face.featurePoints[id];
     ctx.beginPath();
-    ctx.arc(featurePoint.x,featurePoint.y,3,0,2*Math.PI); 
+    ctx.arc(featurePoint.x,featurePoint.y,1,0,2*Math.PI); 
     ctx.stroke();
   }
 }
@@ -160,41 +159,31 @@ function drawEmoji(canvas, img, face) {
   // Obtain a 2D context object to draw on the canvas
   var ctx = canvas.getContext('2d');
   ctx.font="60px Segoe UI Emoji";
-
   // TIP: Pick a particular feature point as an anchor so that the emoji sticks to your face
   ctx.fillText(face.emojis.dominantEmoji, face.featurePoints[3].x, 100);  
 }
 
 // Define any variables and functions to implement the Mimic Me! game mechanics
 var emojiToMimic;
-var score;
-var total;
 var emojis = [ 128528, 9786, 128515, 128524, 128527, 128521, 128535, 128539, 128540, 128542, 128545, 128563, 128561 ];
+var score = 0;
+var total = 0;
+setScore(score, total);
 
 function emojiGame(face) {
-  while (detector.isRunning) {
-    let currentEmoji = toUnicode(face.emojis.dominantEmoji);
-    if (emojiToMimic === currentEmoji) {
-      //TODO calc score depending on time;
-      score = 1;
-      total += 1;
-      setScore(score, total);
-      emojiToMimic = emojis[Math.floor(Math.random()*items.length)];
-      setTargetEmoji(emojiToMimic);
+  if(!emojiToMimic) {
+    getNewTargetEmoji();
+  }; 
+
+  if (emojiToMimic === toUnicode(face.emojis.dominantEmoji)) {
+    score = score + 1;
+    total = total + 1;
+    setScore(score, total);
+    getNewTargetEmoji();
     };
-  }
 }
 
-
-// NOTE:
-// - Remember to call your update function from the "onImageResultsSuccess" event handler above
-// - You can use setTargetEmoji() and setScore() functions to update the respective elements
-// - You will have to pass in emojis as unicode values, e.g. setTargetEmoji(128578) for a simple smiley
-// - Unicode values for all emojis recognized by Affectiva are provided above in the list 'emojis'
-// - To check for a match, you can convert the dominant emoji to unicode using the toUnicode() function
-
-// Optional:
-// - Define an initialization/reset function, and call it from the "onInitializeSuccess" event handler above
-// - Define a game reset function (same as init?), and call it from the onReset() function above
-
-// <your code here>
+function getNewTargetEmoji() {
+  emojiToMimic = emojis[Math.floor(Math.random()* emojis.length)];
+  setTargetEmoji(emojiToMimic);
+}
